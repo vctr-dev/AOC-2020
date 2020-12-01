@@ -3,7 +3,7 @@ const path = require("path");
 
 const TARGET = 2020;
 const maxDepth = 3;
-const testFilePath = path.join(__dirname, "numbers.txt");
+const testFilePath = path.join(__dirname, "input.txt");
 
 const numbers = fs
 	.readFileSync(testFilePath, { encoding: "utf-8" })
