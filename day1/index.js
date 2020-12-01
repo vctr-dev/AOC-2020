@@ -14,16 +14,18 @@ const numbers = fs
 const multiply = (arr) => arr.reduce((a, v) => a * v, 1);
 const sum = (arr) => arr.reduce((a, v) => a + v, 0);
 
-function getNumbers(nums, startIndex = 0, depth = 1, result = []) {
-	if (depth > maxDepth) return;
-	for (let i = startIndex; i < nums.length - (maxDepth - depth); i++) {
+function getNumbers(nums, result = []) {
+	const curDepth = result.length + 1;
+	if (curDepth > maxDepth) return;
+
+	for (let i = 0; i < nums.length - (maxDepth - curDepth); i++) {
 		const newResult = [...result, nums[i]];
 		const total = sum(newResult);
 
 		if (total > TARGET) return;
-		if (depth === maxDepth && total === TARGET) return newResult;
+		if (curDepth === maxDepth && total === TARGET) return newResult;
 
-		const maybeResult = getNumbers(nums, i + 1, depth + 1, newResult);
+		const maybeResult = getNumbers(nums.slice(i + 1), newResult);
 		if (maybeResult) return maybeResult;
 	}
 }
