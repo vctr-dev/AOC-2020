@@ -1,24 +1,31 @@
 const fs = require("fs");
+const path = require("path");
+
+const TARGET = 2020;
+const maxDepth = 3;
+const testFilePath = path.join(__dirname, "numbers.txt");
+
 const numbers = fs
-	.readFileSync("./numbers.txt", { encoding: "utf-8" })
+	.readFileSync(testFilePath, { encoding: "utf-8" })
 	.split("\n")
 	.map((n) => +n)
 	.sort((a, b) => a - b);
 
-const TARGET = 2020;
-function getPair(nums) {
-	for (let i = 0; i < nums.length - 2; i++) {
-		for (let j = i + 1; j < nums.length - 1; j++) {
-			const pairTotal = nums[i] + nums[j];
-			if (pairTotal > TARGET) break;
-			for (let k = j + 1; k < nums.length; k++) {
-				const total = pairTotal + nums[k];
-				if (total > TARGET) break;
-				if (total === TARGET) {
-					return nums[i] * nums[j] * nums[k];
-				}
-			}
-		}
+const multiply = (arr) => arr.reduce((a, v) => a * v, 1);
+const sum = (arr) => arr.reduce((a, v) => a + v, 0);
+
+function getNumbers(nums, startIndex = 0, depth = 1, result = []) {
+	if (depth > maxDepth) return;
+	for (let i = startIndex; i < nums.length - (maxDepth - depth); i++) {
+		const newResult = [...result, nums[i]];
+		const total = sum(newResult);
+
+		if (total > TARGET) return;
+		if (depth === maxDepth && total === TARGET) return newResult;
+
+		const maybeResult = getNumbers(nums, i + 1, depth + 1, newResult);
+		if (maybeResult) return maybeResult;
 	}
 }
-console.log(getPair(numbers));
+
+console.log(multiply(getNumbers(numbers)));
