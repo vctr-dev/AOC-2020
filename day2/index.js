@@ -1,7 +1,8 @@
 const fs = require("fs");
+const path = require("path");
 
 const inputs = fs
-	.readFileSync("./input.txt", { encoding: "utf-8" })
+	.readFileSync(path.join(__dirname, "./input.txt"), { encoding: "utf-8" })
 	.split("\n")
 	.map((line) => {
 		const [policy, ...password] = line.split(": ");
@@ -18,7 +19,7 @@ function passwordCheck1({ policy, password }) {
 }
 
 function passwordCheck2({ policy, password }) {
-	const [_, inPos1, inPos2, letter] = /(\d+)-(\d+) (\w)/.exec(policy);
-	const pairs = [password[inPos1 - 1], password[inPos2 - 1]];
-	return pairs[0] !== pairs[1] && (pairs[0] === letter || pairs[1] === letter);
+	const [_, nPos, letter] = /(\d+-\d+) (\w)/.exec(policy);
+	const pairs = nPos.split("-").map((n) => password[n - 1]);
+	return pairs.filter((c) => c === letter).length === 1;
 }
