@@ -9,26 +9,24 @@ function getInput() {
 
 function solution() {
 	const input = getInput();
-	let offsets = [
+	return [
 		{ x: 1, y: 1 },
 		{ x: 3, y: 1 },
 		{ x: 5, y: 1 },
 		{ x: 7, y: 1 },
 		{ x: 1, y: 2 },
-	];
-	let results = [];
-	offsets.forEach((offset) => {
-		let numTrees = 0;
-		let x = 0;
-		input.forEach((line, i) => {
-			if (i % offset.y === 0) {
-				if (line[x] === "#") numTrees++;
+	]
+		.map((offset) => {
+			let x = 0;
+			return input.reduce((numTrees, line, i) => {
+				if (i % offset.y !== 0) return numTrees;
+
+				const didHitTree = line[x] === "#";
 				x = (x + offset.x) % line.length;
-			}
-		});
-		results.push(numTrees);
-	});
-	return results.reduce((a, v) => a * v, 1);
+				return didHitTree ? numTrees + 1 : numTrees;
+			}, 0);
+		})
+		.reduce((a, v) => a * v, 1);
 }
 
 console.log(solution());
