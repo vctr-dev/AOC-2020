@@ -4,7 +4,8 @@ const path = require("path");
 function getInput() {
 	return fs
 		.readFileSync(path.join(__dirname, "./input.txt"), { encoding: "utf-8" })
-		.split("\n");
+		.split("\n")
+		.filter((line) => line);
 }
 
 function solution() {
