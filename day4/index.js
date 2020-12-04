@@ -41,15 +41,11 @@ function getInput() {
 }
 
 function solution() {
-	const input = getInput();
-	return input.filter((passport) => {
-		return requiredFields.every(({ key, test }) => {
-			if (!passport[key]) return;
-			if (!test(passport[key]))
-				console.log(key, passport[key], test(passport[key]));
-			return passport[key] && test(passport[key]);
-		});
-	}).length;
+	return getInput().filter((passport) =>
+		requiredFields.every(
+			({ key, test }) => passport[key] && test(passport[key])
+		)
+	).length;
 }
 
 console.log(solution());
