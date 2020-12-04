@@ -10,7 +10,7 @@ const requiredFields = [
 	{
 		key: "hgt",
 		test: (v) => {
-			const [match, num, unit] = /^(\d*)(cm|in)$/.exec(v) || [];
+			const [match, num, unit] = /^(\d+)(cm|in)$/.exec(v) || [];
 			if (match) {
 				if (unit === "cm") return between(150, 193)(num);
 				if (unit === "in") return between(59, 76)(num);
