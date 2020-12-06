@@ -13,16 +13,20 @@ function solution() {
 }
 
 function partOne(group) {
-	return [...new Set(group.replace(/\n/g, "").split(""))].length;
+	return Object.keys(getAnswerTally(group)).length;
 }
 
 function partTwo(group) {
 	const groupLength = group.split("\n").length;
-	const answerTally = group
+	return Object.values(getAnswerTally(group)).filter((v) => v === groupLength)
+		.length;
+}
+
+function getAnswerTally(group) {
+	return group
 		.replace(/\n/g, "")
 		.split("")
 		.reduce((a, v) => ({ ...a, [v]: a[v] + 1 || 1 }), {});
-	return Object.values(answerTally).filter((v) => v === groupLength).length;
 }
 
 console.log(solution());
