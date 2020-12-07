@@ -3,41 +3,38 @@ const path = require("path");
 
 console.log(solution());
 
-function reverseGraph(graph) {
-	const gather = {};
-	Object.keys(graph).forEach((node) => {
-		graph[node].forEach(({ name }) => {
-			gather[name] = [...(gather[name] || []), node];
-		});
-	});
-	return gather;
-}
 function solution() {
-	const myBag = "shiny gold bag";
-	const input = getInput();
-	const graph = input.reduce((a, line) => {
-		const rule = parseLine(line);
+	const myColor = "shiny gold bag";
+	const graph = getInput().reduce((a, line) => {
+		const rule = parseRule(line);
 		return { ...a, [rule.source]: rule.dest };
 	}, {});
 
-	// part one
-	// const reverse = reverseGraph(graph);
-	// const queue = [myBag];
-	// const found = new Set();
-	// while (queue.length != 0) {
-	// 	const node = queue.pop();
-	// 	found.add(node);
-	// 	const newNodes = (reverse[node] || []).filter((n) => !found.has(n));
-
-	// 	queue.push(...newNodes);
-	// }
-	// found.delete(myBag);
-
-	// return [...found];
-
+	// return partOne(myColor, graph);
 	// part two
+	return numBag(myColor, graph) - 1;
+}
 
-	return numBag(myBag, graph) - 1;
+function partOne(myColor, graph) {
+	const reverseGraph = Object.entries(graph).reduce((a, [p, c]) => {
+		c.forEach(({ color }) => {
+			a[color] = [...(a[color] || []), p];
+		});
+		return a;
+	}, {});
+
+	const queue = [myColor];
+	const found = new Set();
+	while (queue.length != 0) {
+		const node = queue.pop();
+		found.add(node);
+
+		const newNodes = (reverseGraph[node] || []).filter((n) => !found.has(n));
+		queue.push(...newNodes);
+	}
+	found.delete(myColor);
+
+	return [...found].length;
 }
 
 function numBag(color, graph) {
@@ -45,23 +42,20 @@ function numBag(color, graph) {
 		return 1;
 	}
 	return graph[color]
-		.map(({ q, name }) => {
-			return q * numBag(name, graph);
-		})
+		.map(({ q, color: bagColor }) => q * numBag(bagColor, graph))
 		.reduce((a, v) => a + v, 1);
 }
 
-function parseLine(line) {
+function parseRule(line) {
 	let [match, source, dest] = /^(.*) contain (.*)\.$/.exec(line);
 	source = source.replace(/s$/, "");
 	dest = dest.split(", ");
-	if (dest[0] === "no other bags") {
+	if (dest.includes("no other bags")) {
 		dest = [];
 	} else {
 		dest = dest.map((a) => {
-			let [match2, num, bagName] = /^(\d+) (.*)$/.exec(a);
-			bagName = bagName.replace(/s$/, "");
-			return { q: +num, name: bagName };
+			let [match2, num, color] = /^(\d+) (.*)$/.exec(a);
+			return { q: +num, color: color.replace("bags", "bag") };
 		});
 	}
 	return { source, dest };
