@@ -7,58 +7,45 @@ function parseInput() {
 		.split("\n")
 		.map((line) => {
 			const [action, num] = line.split(" ");
-			const [match, sign, q] = /^(\+|-)(\d+)$/.exec(num);
-			return { action, q: +q * (sign === "+" ? 1 : -1) };
+			return { action, q: +num };
 		});
 }
 
 function partOne(input) {
-	let index = 0;
-	const prevRanIndex = new Set();
-	let acc = 0;
-	while (!prevRanIndex.has(index)) {
-		prevRanIndex.add(index);
-		const { action, q } = input[index];
-		if (action === "nop") index++;
-		if (action === "jmp") index += q;
-		if (action === "acc") {
-			acc += q;
-			index++;
-		}
-	}
-	return acc;
+	return getAcc(input).acc;
 }
 
 function partTwo(input) {
-	const copyInput = (ipt) => [...ipt.map((n) => ({ ...n }))];
 	for (let i = 0; i < input.length; i++) {
-		const newInput = copyInput(input);
-		if (newInput[i].action === "acc") continue;
-		if (newInput[i].action === "jmp") {
-			newInput[i].action = "nop";
-		} else {
-			newInput[i].action = "jmp";
+		const newInput = [...input.map((n) => ({ ...n }))];
+		switch (newInput[i].action) {
+			case "jmp":
+				newInput[i].action = "nop";
+				break;
+			case "nop":
+				newInput[i].action = "jmp";
+				break;
 		}
-		const { isLoop: isALoop, acc } = isLoop(newInput);
-		if (!isALoop) return acc;
+		const { isLoop, acc } = getAcc(newInput);
+		if (!isLoop) return acc;
 	}
 }
 
-function isLoop(input) {
-	let index = 0;
-	const prevRanIndex = new Set();
+function getAcc(input) {
+	let i = 0;
+	const prev = new Set();
 	let acc = 0;
-	while (!prevRanIndex.has(index) && index < input.length) {
-		prevRanIndex.add(index);
-		const { action, q } = input[index];
-		if (action === "nop") index++;
-		if (action === "jmp") index += q;
+	while (!prev.has(i) && i < input.length) {
+		prev.add(i);
+		const { action, q } = input[i];
+		if (action === "nop") i++;
+		if (action === "jmp") i += q;
 		if (action === "acc") {
 			acc += q;
-			index++;
+			i++;
 		}
 	}
-	return { isLoop: index < input.length, acc };
+	return { isLoop: i < input.length, acc };
 }
 
 console.log(solution());
