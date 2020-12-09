@@ -29,32 +29,25 @@ function partOne(input) {
 	}
 }
 
-function partTwo(input) {
-	const num = 248131121;
-	let start, end;
-	outer: for (let i = 0; i <= input.length - 1; i++) {
+function partTwo(input, num) {
+	for (let i = 0; i <= input.length - 1; i++) {
 		let sum = input[i];
-		inner: for (let j = i + 1; j <= input.length - 1; j++) {
+		for (let j = i + 1; j <= input.length - 1; j++) {
 			sum += input[j];
+			if (sum > num) break;
 			if (sum === num) {
-				start = i;
-				end = j;
-				break outer;
-			}
-			if (sum > num) {
-				break inner;
+				const result = input.slice(i, j + 1);
+				return Math.max(...result) + Math.min(...result);
 			}
 		}
 	}
-
-	const result = input.slice(start, end + 1);
-	return Math.max(...result) + Math.min(...result);
 }
 
 console.log(solution());
 
 function solution() {
 	const input = parseInput();
+	const partOneAns = partOne(input);
 
-	return { partOne: partOne(input), partTwo: partTwo(input) };
+	return { partOne: partOneAns, partTwo: partTwo(input, partOneAns) };
 }
