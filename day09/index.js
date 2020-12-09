@@ -1,5 +1,4 @@
 const fs = require("fs");
-const { maxHeaderSize } = require("http");
 const path = require("path");
 
 function parseInput() {
