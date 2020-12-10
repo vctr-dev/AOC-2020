@@ -20,23 +20,15 @@ function partOne(input) {
 }
 
 function partTwo(input, prevAns) {
-	const numTouches = [];
-	input.forEach((v, i) => (numTouches[i] = 0));
+	const numTouches = new Array(input.length).fill(0);
 	numTouches[0] = 1;
-	input.forEach((v, i) => {
-		numTouches[i + 1] += numTouches[i];
-		// try skip 1
-		const skipOne = input[i + 2];
-		if (skipOne && skipOne - v <= 3) {
-			numTouches[i + 2] += numTouches[i];
+	for (let i = 0; i < input.length - 1; i++) {
+		for (let j = i + 1; j < input.length; j++) {
+			if (input[j] - input[i] > 3) break;
+			numTouches[j] += numTouches[i];
 		}
-		// try skip 2
-		const skipTwo = input[i + 3];
-		if (skipTwo && skipTwo - v <= 3) {
-			numTouches[i + 3] += numTouches[i];
-		}
-	});
-	return numTouches[numTouches.length - 2];
+	}
+	return numTouches[numTouches.length - 1];
 }
 
 console.log(solution());
