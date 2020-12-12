@@ -9,12 +9,6 @@ function parseInput() {
 	return input;
 }
 
-const symMap = {
-	".": "floor",
-	L: "empty",
-	"#": "occupied",
-};
-
 function sameLayout(a, b) {
 	return a.every((r, i) => r.every((c, j) => c === b[i][j]));
 }
@@ -67,25 +61,25 @@ function makeNewLayoutPartTwo(input) {
 	);
 }
 
-function getLineOfSightOccupiedSeats(input, i, j) {
+function getLineOfSightOccupiedSeats(input, r, c) {
 	let t = 0;
 	let directions = [];
-	for (let k = -1; k < 2; k++)
-		for (let l = -1; l < 2; l++) directions.push([k, l]);
-	directions = directions.filter(([x, y]) => x !== 0 || y !== 0);
-	const outOfRange = (x, y) => !input[x] || !input[x][y];
-	directions.forEach(([x, y]) => {
-		let [cx, cy] = [i + x, j + y];
-		while (input[cx] && input[cx][cy]) {
-			const point = input[cx][cy];
-			if (point === "#") {
-				t++;
-				break;
+	for (let i = -1; i < 2; i++)
+		for (let j = -1; j < 2; j++) directions.push([i, j]);
+	directions
+		.filter(([x, y]) => x !== 0 || y !== 0)
+		.forEach(([ox, oy]) => {
+			let [cx, cy] = [r + ox, c + oy];
+			while (input[cx] && input[cx][cy]) {
+				const point = input[cx][cy];
+				if (point === "#") {
+					t++;
+					break;
+				}
+				if (point === "L") break;
+				[cx, cy] = [cx + ox, cy + oy];
 			}
-			if (point === "L") break;
-			[cx, cy] = [cx + x, cy + y];
-		}
-	});
+		});
 	return t;
 }
 
