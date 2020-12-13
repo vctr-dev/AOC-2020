@@ -36,15 +36,18 @@ function partTwo({ b }, prevAns) {
 		})
 		.filter(Boolean)
 		.sort((a, b) => -a.n + b.n);
-	let ts = b[0].n - b[0].o;
-	let currentLcm = b[0].n;
-	for (let i = 1; i < b.length; i++) {
-		let { n, o } = b[i];
+	let ts, currentLcm;
+	{
+		let { n, o } = b.shift();
+		ts = n - o;
+		currentLcm = n;
+	}
+	b.forEach(({ n, o }) => {
 		while ((ts + o) % n !== 0) {
 			ts += currentLcm;
 		}
 		currentLcm *= n;
-	}
+	});
 	return ts;
 }
 
