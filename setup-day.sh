@@ -8,4 +8,4 @@ inputFileUrl="https://adventofcode.com/2020/day/$1"
 outputFile="./day$1/problem.html"
 curl "$inputFileUrl" --output "$outputFile" --cookie "$(cat ./.cookie)"
 google-chrome "$outputFile" &
-nodemon "./day$1/index.js"
+nodemon "./day$1/index.js" -e txt,js
