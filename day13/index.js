@@ -39,11 +39,11 @@ function partTwo({ b }, prevAns) {
 	let ts = b[0].n - b[0].o;
 	let currentLcm = b[0].n;
 	for (let i = 1; i < b.length; i++) {
-		let b1 = b[i];
-		while ((ts + b1.o) % b1.n !== 0) {
+		let { n, o } = b[i];
+		while ((ts + o) % n !== 0) {
 			ts += currentLcm;
 		}
-		currentLcm *= b1.n;
+		currentLcm *= n;
 	}
 	return ts;
 }
