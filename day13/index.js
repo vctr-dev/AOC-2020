@@ -14,18 +14,11 @@ function parseInput() {
 }
 
 function partOne({ ts, b }) {
-	b = b.filter((c) => c !== "x");
-	let indexOfSmallest;
-	let smallest = Infinity;
-	b.map((b1) => b1 - (ts % b1)).forEach((b1, i) => {
-		if (b1 < smallest) {
-			indexOfSmallest = i;
-			smallest = b1;
-		}
-	});
-	const n = b[indexOfSmallest];
-
-	return smallest * n;
+	const { diff, bus } = b
+		.filter((c) => c !== "x")
+		.map((bus) => ({ diff: Math.ceil(ts / bus) * bus - ts, bus }))
+		.reduce((acc, v) => (acc.diff < v.diff ? acc : v));
+	return diff * bus;
 }
 
 function partTwo({ b }, prevAns) {
