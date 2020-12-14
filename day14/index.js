@@ -37,11 +37,7 @@ function applyMask(mask, val) {
 	);
 }
 
-let runOnce = false;
 function partOne(input) {
-	// if (runOnce) return "skip";
-	// runOnce = true;
-
 	const memSpace = {};
 	input.forEach(({ mask, mems }) => {
 		mems.forEach(({ addr, val }) => (memSpace[addr] = applyMask(mask, val)));
@@ -51,9 +47,6 @@ function partOne(input) {
 }
 
 function partTwo(input, prevAns) {
-	// if (runOnce) return "skip";
-	// runOnce = true;
-
 	const memSpace = {};
 	input.forEach(({ mask, mems }) => {
 		mems.forEach(({ addr, val }) => {
