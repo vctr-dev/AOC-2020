@@ -27,20 +27,17 @@ function parseInput(file) {
 function valToString(val, mask) {
 	return val.toString(2).padStart(mask.length, 0);
 }
-function applyMask(mask, val) {
-	return parseInt(
-		valToString(val, mask)
-			.split("")
-			.map((v, i) => (mask[i] === "X" ? v : mask[i]))
-			.join(""),
-		2
-	);
-}
 
 function partOne(input) {
 	const memSpace = {};
 	input.forEach(({ mask, mems }) => {
-		mems.forEach(({ addr, val }) => (memSpace[addr] = applyMask(mask, val)));
+		mems.forEach(
+			({ addr, val }) =>
+				(memSpace[addr] = parseInt(
+					applyMask(val, mask, (v, m) => (m === "X" ? v : m)),
+					2
+				))
+		);
 	});
 
 	return Object.values(memSpace).reduce((a, v) => a + v, 0);
@@ -58,11 +55,16 @@ function partTwo(input, prevAns) {
 	return Object.values(memSpace).reduce((a, v) => a + v, 0);
 }
 
-function getAddresses(mask, val) {
-	const applied = valToString(val, mask)
+function applyMask(val, mask, delegate) {
+	return valToString(val, mask)
 		.split("")
-		.map((v, i) => (mask[i] === "0" ? v : mask[i]))
+		.map((v, i) => delegate(v, mask[i]))
 		.join("");
+}
+
+function getAddresses(mask, val) {
+	const applied = applyMask(val, mask, (v, m) => (m === "0" ? v : m));
+
 	const mayHaveFloat = [applied];
 	const noFloat = [];
 	while (mayHaveFloat.length != 0) {
