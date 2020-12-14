@@ -31,13 +31,7 @@ function applyMask(mask, val) {
 	return parseInt(
 		valToString(val, mask)
 			.split("")
-			.map((v, i) => {
-				const m = mask[i];
-				if (m === "X") {
-					return v;
-				}
-				return m;
-			})
+			.map((v, i) => (mask[i] === "X" ? v : mask[i]))
 			.join(""),
 		2
 	);
@@ -63,8 +57,7 @@ function partTwo(input, prevAns) {
 	const memSpace = {};
 	input.forEach(({ mask, mems }) => {
 		mems.forEach(({ addr, val }) => {
-			const addresses = getAddresses(mask, addr);
-			addresses.forEach((address) => {
+			getAddresses(mask, addr).forEach((address) => {
 				memSpace[address] = val;
 			});
 		});
@@ -75,28 +68,23 @@ function partTwo(input, prevAns) {
 function getAddresses(mask, val) {
 	const applied = valToString(val, mask)
 		.split("")
-		.map((v, i) => {
-			let m = mask[i];
-			if (m == "0") return v;
-			return m;
-		})
+		.map((v, i) => (mask[i] === "0" ? v : mask[i]))
 		.join("");
-	const addressesWithFloat = [applied];
-	const addressesWithoutFloat = [];
-	while (addressesWithFloat.length != 0) {
-		const cur = addressesWithFloat.pop().split("");
+	const mayHaveFloat = [applied];
+	const noFloat = [];
+	while (mayHaveFloat.length != 0) {
+		const cur = mayHaveFloat.pop().split("");
 		const i = cur.findIndex((c) => c === "X");
-		console.log(i);
 		if (i < 0) {
-			addressesWithoutFloat.push(cur.join(""));
+			noFloat.push(cur.join(""));
 			continue;
 		}
-		cur[i] = 0;
-		addressesWithFloat.push(cur.join(""));
-		cur[i] = 1;
-		addressesWithFloat.push(cur.join(""));
+		["0", "1"].forEach((x) => {
+			cur[i] = x;
+			mayHaveFloat.push(cur.join(""));
+		});
 	}
-	return addressesWithoutFloat.map((v) => parseInt(v, 2));
+	return noFloat.map((v) => parseInt(v, 2));
 }
 
 console.table(solution());
