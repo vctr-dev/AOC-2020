@@ -11,7 +11,7 @@ function parseInput(file) {
 
 function partOne(input) {
 	const max = 30000000;
-	const mem = {};
+	const mem = new Int32Array(max);
 
 	input.forEach((v, i) => (mem[v] = i + 1));
 	let last = input[input.length - 1];
