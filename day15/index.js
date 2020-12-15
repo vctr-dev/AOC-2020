@@ -11,15 +11,15 @@ function parseInput(file) {
 
 function partOne(input) {
 	const max = 30000000;
-	const mem = {}; // shape number: {prev, prevprev}
+	const mem = {};
 
-	input.forEach((v, i) => (mem[v] = { prev: i + 1 }));
+	input.forEach((v, i) => (mem[v] = i + 1));
 	let last = input[input.length - 1];
 	for (let i = input.length + 1; i <= max; i++) {
-		let { prev, prevprev } = mem[last];
-		last = (prev && prevprev && prev - prevprev) || 0;
-		prev = (mem[last] || {}).prev;
-		mem[last] = { prev: i, prevprev: prev };
+		let prev = mem[last];
+		let latest = i - 1;
+		mem[last] = latest;
+		last = (prev && latest - prev) || 0;
 	}
 	return last;
 }
