@@ -16,13 +16,10 @@ function partOne(input) {
 	input.forEach((v, i) => (mem[v] = { prev: i + 1 }));
 	let last = input[input.length - 1];
 	for (let i = input.length + 1; i <= max; i++) {
-		if (mem[last] && mem[last].prev && mem[last].prevprev) {
-			last = mem[last].prev - mem[last].prevprev;
-			mem[last] = { prev: i, prevprev: mem[last] && mem[last].prev };
-			continue;
-		}
-		last = 0;
-		mem[last] = { prev: i, prevprev: mem[last] && mem[last].prev };
+		let { prev, prevprev } = mem[last];
+		last = (prev && prevprev && prev - prevprev) || 0;
+		prev = (mem[last] || {}).prev;
+		mem[last] = { prev: i, prevprev: prev };
 	}
 	return last;
 }
