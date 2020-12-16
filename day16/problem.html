@@ -87,10 +87,10 @@ If you'd like to hang out, I'm @ericwastl on Twitter.
 
 -->
 <body>
-<header><div><h1 class="title-global"><a href="/">Advent of Code</a></h1><nav><ul><li><a href="/2020/about">[About]</a></li><li><a href="/2020/events">[Events]</a></li><li><a href="https://teespring.com/stores/advent-of-code" target="_blank">[Shop]</a></li><li><a href="/2020/settings">[Settings]</a></li><li><a href="/2020/auth/logout">[Log Out]</a></li></ul></nav><div class="user">Victor Chan <a href="/2020/support" class="supporter-badge" title="Advent of Code Supporter">(AoC++)</a> <span class="star-count">30*</span></div></div><div><h1 class="title-event">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="title-event-wrap">/*</span><a href="/2020">2020</a><span class="title-event-wrap">*/</span></h1><nav><ul><li><a href="/2020">[Calendar]</a></li><li><a href="/2020/support">[AoC++]</a></li><li><a href="/2020/sponsors">[Sponsors]</a></li><li><a href="/2020/leaderboard">[Leaderboard]</a></li><li><a href="/2020/stats">[Stats]</a></li></ul></nav></div></header>
+<header><div><h1 class="title-global"><a href="/">Advent of Code</a></h1><nav><ul><li><a href="/2020/about">[About]</a></li><li><a href="/2020/events">[Events]</a></li><li><a href="https://teespring.com/stores/advent-of-code" target="_blank">[Shop]</a></li><li><a href="/2020/settings">[Settings]</a></li><li><a href="/2020/auth/logout">[Log Out]</a></li></ul></nav><div class="user">Victor Chan <a href="/2020/support" class="supporter-badge" title="Advent of Code Supporter">(AoC++)</a> <span class="star-count">32*</span></div></div><div><h1 class="title-event">&nbsp;&nbsp;&nbsp;<span class="title-event-wrap">&lt;y&gt;</span><a href="/2020">2020</a><span class="title-event-wrap">&lt;/y&gt;</span></h1><nav><ul><li><a href="/2020">[Calendar]</a></li><li><a href="/2020/support">[AoC++]</a></li><li><a href="/2020/sponsors">[Sponsors]</a></li><li><a href="/2020/leaderboard">[Leaderboard]</a></li><li><a href="/2020/stats">[Stats]</a></li></ul></nav></div></header>
 
 <div id="sidebar">
-<div id="sponsor"><div class="quiet">Our <a href="/2020/sponsors">sponsors</a> help make Advent of Code possible:</div><div class="sponsor"><a href="https://jobs.americanexpress.com/technology" target="_blank" onclick="if(ga)ga('send','event','sponsor','sidebar',this.href);" rel="noopener">American Express</a> - We architect, code and ship software that makes us an essential part of our customers’ digital lives. Work with the latest tech and back the engineering community through open source. Find your place in tech on #TeamAmex.</div></div>
+<div id="sponsor"><div class="quiet">Our <a href="/2020/sponsors">sponsors</a> help make Advent of Code possible:</div><div class="sponsor"><a href="https://www.reaktor.com/coding-puzzles/" target="_blank" onclick="if(ga)ga('send','event','sponsor','sidebar',this.href);" rel="noopener">Reaktor</a> - Cracking puzzles since 2000. Always looking for people who don’t shy away from a challenge.</div></div>
 </div><!--/sidebar-->
 
 <main>
@@ -126,11 +126,30 @@ nearby tickets:
 <p>It doesn't matter which position corresponds to which field; you can identify invalid <em>nearby tickets</em> by considering only whether tickets contain <em>values that are not valid for any field</em>. In this example, the values on the first <em>nearby ticket</em> are all valid for at least one field. This is not true of the other three <em>nearby tickets</em>: the values <code>4</code>, <code>55</code>, and <code>12</code> are are not valid for any field. Adding together all of the invalid values produces your <em>ticket scanning error rate</em>: <code>4 + 55 + 12</code> = <em><code>71</code></em>.</p>
 <p>Consider the validity of the <em>nearby tickets</em> you scanned. <em>What is your ticket scanning error rate?</em></p>
 </article>
-<p>To begin, <a href="16/input" target="_blank">get your puzzle input</a>.</p>
-<form method="post" action="16/answer"><input type="hidden" name="level" value="1"/><p>Answer: <input type="text" name="answer" autocomplete="off"/> <input type="submit" value="[Submit]"/></p></form>
+<p>Your puzzle answer was <code>25961</code>.</p><article class="day-desc"><h2 id="part2">--- Part Two ---</h2><p>Now that you've identified which tickets contain invalid values, <em>discard those tickets entirely</em>. Use the remaining valid tickets to determine which field is which.</p>
+<p>Using the valid ranges for each field, determine what order the fields appear on the tickets. The order is consistent between all tickets: if <code>seat</code> is the third field, it is the third field on every ticket, including <em>your ticket</em>.</p>
+<p>For example, suppose you have the following notes:</p>
+<pre><code>class: 0-1 or 4-19
+row: 0-5 or 8-19
+seat: 0-13 or 16-19
+
+your ticket:
+11,12,13
+
+nearby tickets:
+3,9,18
+15,1,5
+5,14,9
+</code></pre>
+<p>Based on the <em>nearby tickets</em> in the above example, the first position must be <code>row</code>, the second position must be <code>class</code>, and the third position must be <code>seat</code>; you can conclude that in <em>your ticket</em>, <code>class</code> is <code>12</code>, <code>row</code> is <code>11</code>, and <code>seat</code> is <code>13</code>.</p>
+<p>Once you work out which field is which, look for the six fields on <em>your ticket</em> that start with the word <code>departure</code>. <em>What do you get if you multiply those six values together?</em></p>
+</article>
+<p>Your puzzle answer was <code>603409823791</code>.</p><p class="day-success">Both parts of this puzzle are complete! They provide two gold stars: **</p>
+<p>At this point, you should <a href="/2020">return to your Advent calendar</a> and try another puzzle.</p>
+<p>If you still want to see it, you can <a href="16/input" target="_blank">get your puzzle input</a>.</p>
 <p>You can also <span class="share">[Share<span class="share-content">on
-  <a href="https://twitter.com/intent/tweet?text=%22Ticket+Translation%22+%2D+Day+16+%2D+Advent+of+Code+2020&amp;url=https%3A%2F%2Fadventofcode%2Ecom%2F2020%2Fday%2F16&amp;related=ericwastl&amp;hashtags=AdventOfCode" target="_blank">Twitter</a>
-  <a href="javascript:void(0);" onclick="var mastodon_instance=prompt('Mastodon Instance / Server Name?'); if(typeof mastodon_instance==='string' && mastodon_instance.length){this.href='https://'+mastodon_instance+'/share?text=%22Ticket+Translation%22+%2D+Day+16+%2D+Advent+of+Code+2020+%23AdventOfCode+https%3A%2F%2Fadventofcode%2Ecom%2F2020%2Fday%2F16'}else{return false;}" target="_blank">Mastodon</a
+  <a href="https://twitter.com/intent/tweet?text=I%27ve+completed+%22Ticket+Translation%22+%2D+Day+16+%2D+Advent+of+Code+2020&amp;url=https%3A%2F%2Fadventofcode%2Ecom%2F2020%2Fday%2F16&amp;related=ericwastl&amp;hashtags=AdventOfCode" target="_blank">Twitter</a>
+  <a href="javascript:void(0);" onclick="var mastodon_instance=prompt('Mastodon Instance / Server Name?'); if(typeof mastodon_instance==='string' && mastodon_instance.length){this.href='https://'+mastodon_instance+'/share?text=I%27ve+completed+%22Ticket+Translation%22+%2D+Day+16+%2D+Advent+of+Code+2020+%23AdventOfCode+https%3A%2F%2Fadventofcode%2Ecom%2F2020%2Fday%2F16'}else{return false;}" target="_blank">Mastodon</a
 ></span>]</span> this puzzle.</p>
 </main>
 
