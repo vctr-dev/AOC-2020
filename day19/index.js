@@ -19,10 +19,21 @@ function parseInput(file) {
 }
 
 function partOne({ rulesets, messages }) {
-	return messages.filter((message) => cykTest(rulesets, message, "0")).length;
+	let count = 0;
+	const test = makeCykTest(rulesets);
+	messages.forEach((message, i) => {
+		console.log(`Working on ${i + 1}/${messages.length}`);
+		console.time();
+		if (test(message, "0")) {
+			count++;
+		}
+		console.timeEnd();
+		console.log(`Current count: ${count}`);
+	});
+	return count;
 }
 
-function cykTest(grammar, message, start) {
+function makeCykTest(grammar) {
 	// Find convert to terminating rules
 	const terminals = {};
 	grammar.forEach(({ key, rules }) => {
@@ -34,6 +45,19 @@ function cykTest(grammar, message, start) {
 			}
 		});
 	});
+	grammar.forEach(
+		({ key, rules }) =>
+			rules
+				.filter((rule) => !(rule.length === 1 && isNaN(rule[0])))
+				.every((rule) => rule.length === 2) ||
+			console.log("Fix this", { key, rules })
+	);
+	return (message, start) => {
+		return cykTest(grammar, terminals, message, start);
+	};
+}
+function cykTest(grammar, terminals, message, start) {
+	// Find convert to terminating rules
 
 	const messageArray = message.split("");
 	const funnel = [];
@@ -56,13 +80,9 @@ function cykTest(grammar, message, start) {
 				let possiblePredicates = makeCombinations(firstSymbols, secondSymbols);
 				const symbolsFound = possiblePredicates
 					.map((predicate) => findSymbol(grammar, predicate))
+					.filter(Boolean)
 					.flat();
-				symbols.push(
-					...possiblePredicates
-						.map((predicate) => findSymbol(grammar, predicate))
-						.filter(Boolean)
-						.flat()
-				);
+				symbols.push(...symbolsFound);
 			}
 			row.push(symbols);
 		}
@@ -101,14 +121,14 @@ function makeCombinations(a, b) {
 }
 
 const run = [
-	{
-		file: "sample.txt",
-		fn: partOne,
-	},
 	// {
-	// 	file: "input.txt",
+	// 	file: "sample.txt",
 	// 	fn: partOne,
 	// },
+	{
+		file: "input.txt",
+		fn: partOne,
+	},
 ];
 
 console.table(solution());
