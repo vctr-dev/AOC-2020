@@ -44,18 +44,39 @@ class Point {
 }
 
 class Cube {
-	points = [];
+	index = {};
 	getPoint(x, y, z, w) {
-		return this.points.find((p) => p.isEqual(new Point(x, y, z, w)));
+		try {
+			return this.index[x][y][z][w];
+		} catch (e) {
+			return;
+		}
 	}
 	setPoint(x, y, z, w, item) {
-		const point = this.getPoint(x, y, z, w);
-		if (point) {
-			point.item = item;
-		} else {
-			this.points.push(new Point(x, y, z, w, item));
-		}
+		const xv = this.index[x] || {};
+		const yv = xv[y] || {};
+		const zv = yv[z] || {};
+		zv[w] = new Point(x, y, z, w, item);
+		yv[z] = zv;
+		xv[y] = yv;
+		this.index[x] = xv;
 		return this;
+	}
+	get points() {
+		const points = [];
+		Object.entries(this.index).forEach(([x, xv]) =>
+			Object.entries(xv).forEach(([y, yv]) =>
+				Object.entries(yv).forEach(([z, zv]) =>
+					Object.values(zv).forEach((p) => points.push(p))
+				)
+			)
+		);
+		return points;
+	}
+
+	set points(points) {
+		this.index = {};
+		points.forEach((p) => this.setPoint(p.x, p.y, p.z, p.w, p.item));
 	}
 	getNeighbouringItems(point) {
 		return point
@@ -172,10 +193,10 @@ function partOne(input) {
 }
 
 const run = [
-	{
-		file: "sample.txt",
-		fn: partOne,
-	},
+	// {
+	// 	file: "sample.txt",
+	// 	fn: partOne,
+	// },
 	{
 		file: "input.txt",
 		fn: partOne,
