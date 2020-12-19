@@ -5,90 +5,99 @@ function parseInput(file) {
 	let [rulesets, messages] = fs
 		.readFileSync(path.join(__dirname, file), { encoding: "utf-8" })
 		.split("\n\n");
-	rulesets = rulesets.split("\n").reduce((acc, rule) => {
+	rulesets = rulesets.split("\n").map((rule) => {
 		let [match, i, rs] = /^(\d+): (.*)$/.exec(rule);
 		rs = rs.split(" | ");
 		rs = rs.map((r) => r.split(" ").map((item) => item.replace(/"/g, "")));
-		acc[i] = rs;
-		return acc;
-	}, new Array(rulesets.length));
+		return {
+			key: i,
+			rules: rs,
+		};
+	});
 	messages = messages.split("\n");
 	return { rulesets, messages };
 }
 
 function partOne({ rulesets, messages }) {
-	let rulesToEvaluate = rulesets[0];
-	let unmatchedMessages = [...messages];
-	while (rulesToEvaluate.length > 0) {
-		rule = rulesToEvaluate.pop();
-		if (rule.every((item) => isNaN(item))) {
-			rule = rule.join("");
-			unmatchedMessages = unmatchedMessages.filter(
-				(message) => message !== rule
-			);
-			console.log(unmatchedMessages.length);
-			continue;
-		}
-
-		let newRuleset = createRulesetFromRule(rulesets, rule);
-		newRuleset = filterRules(newRuleset, unmatchedMessages);
-
-		rulesToEvaluate.push(...newRuleset);
-	}
-	return messages.length - unmatchedMessages.length;
+	return messages.filter((message) => cykTest(rulesets, message, "0")).length;
 }
 
-// can we throw out rulesets that do not match any messages?
-function filterRules(rules, messages) {
-	return rules.filter((rule) => possibleToMatch(rule, messages));
-}
-
-function possibleToMatch(rule, messages) {
-	const messagesToConsider = messages.filter(
-		(message) => message.length >= rule.length
-	);
-	if (messagesToConsider.length === 0) {
-		return false;
-	}
-	for (let i = 0; i < rule.length; i++) {
-		const item = rule[i];
-		if (!isNaN(item)) break;
-		if (messagesToConsider.every((message) => message[i] !== item)) {
-			return false;
-		}
-	}
-	return true;
-}
-
-function resolveRuleset(rulesets, targetRuleset, debug) {
-	const res = [];
-	targetRuleset.forEach((rule) => {
-		const newRuleset = createRulesetFromRule(rulesets, rule);
-		res.push(...newRuleset);
-	});
-	return res;
-}
-function createRulesetFromRule(rulesets, rule, debug) {
-	debug && console.log(rule);
-	let newRuleset = [[]];
-	rule.forEach((ruleItem) => {
-		const refRuleset = rulesets[ruleItem] || [[ruleItem]];
-		newRuleset = combineRuleset(newRuleset, refRuleset);
-	});
-	return newRuleset;
-}
-
-function combineRuleset(a, b) {
-	const res = [];
-	a.forEach((x) => {
-		b.forEach((y) => {
-			res.push([...x, ...y]);
+function cykTest(grammar, message, start) {
+	// Find convert to terminating rules
+	const terminals = {};
+	grammar.forEach(({ key, rules }) => {
+		rules.forEach((rule) => {
+			if (rule.length != 1) return;
+			// if is terminating
+			if (isNaN(rule[0])) {
+				terminals[rule[0]] = [...(terminals[rule[0]] || []), key];
+			}
 		});
 	});
-	return res;
+
+	const messageArray = message.split("");
+	const funnel = [];
+	funnel.push(messageArray.map((l) => terminals[l]));
+
+	// reduce funnel down to one by iterating to message length
+	let prev = funnel[funnel.length - 1];
+	// construct rows
+	for (let i = 1; i < message.length; i++) {
+		const row = [];
+		// construct column of the row
+		for (let j = 0; j < prev.length - 1; j++) {
+			// For each new blank space, we need to loop through the vertical and diagonal to get what to compare
+			let symbols = [];
+			for (let k = 0; k < i; k++) {
+				// the vertical
+				const firstSymbols = funnel[k][j];
+				// the diagonal
+				const secondSymbols = funnel[i - k - 1][j + k + 1];
+				let possiblePredicates = makeCombinations(firstSymbols, secondSymbols);
+				const symbolsFound = possiblePredicates
+					.map((predicate) => findSymbol(grammar, predicate))
+					.flat();
+				symbols.push(
+					...possiblePredicates
+						.map((predicate) => findSymbol(grammar, predicate))
+						.filter(Boolean)
+						.flat()
+				);
+			}
+			row.push(symbols);
+		}
+		funnel.push(row);
+
+		prev = row;
+	}
+	return prev.flat().includes(start);
 }
-function partTwo(input, partOneAns) {
-	return "part one";
+
+function findSymbol(grammar, predicate) {
+	return grammar
+		.filter(({ rules }) => {
+			return (
+				rules.filter((rule) => {
+					// console.log({ rule, predicate });
+					return fulfilsRule(rule, predicate);
+				}).length > 0
+			);
+		})
+		.map(({ key }) => key);
+}
+
+function fulfilsRule(a, b) {
+	return a.join(",") === b.join(",");
+}
+
+function makeCombinations(a, b) {
+	const combinations = [];
+	a.forEach((x) => {
+		b.forEach((y) => {
+			combinations.push([x, y]);
+		});
+	});
+	return combinations;
 }
 
 const run = [
@@ -96,18 +105,10 @@ const run = [
 		file: "sample.txt",
 		fn: partOne,
 	},
-	{
-		file: "input.txt",
-		fn: partOne,
-	},
-	// {
-	// 	file: "sample.txt",
-	// 	fn: (input) => partTwo(input, partOne(input))
-	// },
 	// {
 	// 	file: "input.txt",
-	// 	fn: (input) => partTwo(input, partOne(input))
-	// }
+	// 	fn: partOne,
+	// },
 ];
 
 console.table(solution());
