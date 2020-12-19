@@ -10,28 +10,32 @@ function parseInput(file) {
 }
 
 class Point {
-	constructor(x, y, z, item = ".") {
+	constructor(x, y, z, w, item = ".") {
 		this.x = x;
 		this.y = y;
 		this.z = z;
+		this.w = w;
 		this.item = item;
 	}
-	isEqual({ x, y, z }) {
-		return this.x === x && this.y === y && this.z === z;
+	isEqual({ x, y, z, w }) {
+		return this.x === x && this.y === y && this.z === z && this.w === w;
 	}
 	getNeighbouringCoordinates() {
 		const coord = [];
 		for (let x = -1; x <= 1; x++) {
 			for (let y = -1; y <= 1; y++) {
 				for (let z = -1; z <= 1; z++) {
-					if (x === 0 && y === 0 && z === 0) {
-						continue;
+					for (let w = -1; w <= 1; w++) {
+						if ([x, y, z, w].every((c) => c === 0)) {
+							continue;
+						}
+						coord.push({
+							x: this.x + x,
+							y: this.y + y,
+							z: this.z + z,
+							w: this.w + w,
+						});
 					}
-					coord.push({
-						x: this.x + x,
-						y: this.y + y,
-						z: this.z + z,
-					});
 				}
 			}
 		}
@@ -41,23 +45,22 @@ class Point {
 
 class Cube {
 	points = [];
-	getPoint(x, y, z) {
-		const point = this.points.find((p) => p.isEqual(new Point(x, y, z)));
-		return point;
+	getPoint(x, y, z, w) {
+		return this.points.find((p) => p.isEqual(new Point(x, y, z, w)));
 	}
-	setPoint(x, y, z, item) {
-		const point = this.getPoint(x, y, z);
+	setPoint(x, y, z, w, item) {
+		const point = this.getPoint(x, y, z, w);
 		if (point) {
 			point.item = item;
 		} else {
-			this.points.push(new Point(x, y, z, item));
+			this.points.push(new Point(x, y, z, w, item));
 		}
 		return this;
 	}
 	getNeighbouringItems(point) {
 		return point
 			.getNeighbouringCoordinates()
-			.map(({ x, y, z }) => this.getPoint(x, y, z))
+			.map(({ x, y, z, w }) => this.getPoint(x, y, z, w))
 			.filter(Boolean)
 			.map((p) => p.item);
 	}
@@ -65,29 +68,32 @@ class Cube {
 		const x = this.points.map((p) => p.x);
 		const y = this.points.map((p) => p.y);
 		const z = this.points.map((p) => p.z);
+		const w = this.points.map((p) => p.w);
 		return {
 			lower: {
 				x: Math.min(...x),
 				y: Math.min(...y),
 				z: Math.min(...z),
+				w: Math.min(...w),
 			},
 			upper: {
 				x: Math.max(...x),
 				y: Math.max(...y),
 				z: Math.max(...z),
+				w: Math.max(...w),
 			},
 		};
 	}
 
-	getZLayer(z) {
+	getZLayer(z, w) {
 		const { lower, upper } = this.getBoundaries();
 		const layer = [];
-		const points = this.points.filter((p) => p.z === z);
+		const points = this.points.filter((p) => p.z === z && p.w === w);
 		for (let y = lower.y; y <= upper.y; y++) {
 			const row = [];
 			layer.push(row);
 			for (let x = lower.x; x <= upper.x; x++) {
-				let p = this.getPoint(x, y, z) || new Point(x, y, z);
+				let p = this.getPoint(x, y, z, w) || new Point(x, y, z, w);
 				row.push(p.item);
 			}
 		}
@@ -97,8 +103,10 @@ class Cube {
 	toString() {
 		const { lower, upper } = this.getBoundaries();
 		let string = "";
-		for (let z = lower.z; z <= upper.z; z++) {
-			string += `z=${z}\n` + this.getZLayer(z) + "\n\n";
+		for (let w = lower.w; w <= upper.w; w++) {
+			for (let z = lower.z; z <= upper.z; z++) {
+				string += `z=${z}, w=${w}\n` + this.getZLayer(z, w) + "\n\n";
+			}
 		}
 		return string;
 	}
@@ -116,28 +124,35 @@ class Cube {
 		for (let x = lower.x; x <= upper.x; x++) {
 			for (let y = lower.y; y <= upper.y; y++) {
 				for (let z = lower.z; z <= upper.z; z++) {
-					let point = this.getPoint(x, y, z) || new Point(x, y, z);
-					const numActives = this.getNeighbouringItems(point).filter(
-						(item) => item === "#"
-					).length;
-					if (point.item === "#") {
-						if (numActives === 2 || numActives === 3) {
-							newCube.setPoint(x, y, z, "#");
+					for (let w = lower.w; w <= upper.w; w++) {
+						let point = this.getPoint(x, y, z, w) || new Point(x, y, z, w);
+						const numActives = this.getNeighbouringItems(point).filter(
+							(item) => item === "#"
+						).length;
+						if (point.item === "#") {
+							if (numActives === 2 || numActives === 3) {
+								newCube.setPoint(x, y, z, w, "#");
+							} else {
+								newCube.setPoint(x, y, z, w, ".");
+							}
 						} else {
-							newCube.setPoint(x, y, z, ".");
-						}
-					} else {
-						if (numActives === 3) {
-							newCube.setPoint(x, y, z, "#");
+							if (numActives === 3) {
+								newCube.setPoint(x, y, z, w, "#");
+							}
 						}
 					}
 				}
 			}
 		}
+		newCube.removeInactivePoints();
 		return newCube;
 	}
 	count(fn) {
 		return this.points.filter((p) => fn(p)).length;
+	}
+
+	removeInactivePoints() {
+		this.points = this.points.filter((p) => p.item === "#");
 	}
 }
 
@@ -148,38 +163,30 @@ function partOne(input) {
 			cube.setPoint(x, y, 0, 0, col);
 		})
 	);
-	for (let i = 0; i < 6; i++) cube = cube.cycle();
+
+	for (let i = 0; i < 6; i++) {
+		console.log(`Working on ${i}`);
+		cube = cube.cycle();
+	}
 	return cube.count((p) => p.item === "#");
 }
 
-function partTwo(input, prevAns) {
-	return "part two";
-}
-
-const run = {
-	partOne: {
-		"sample.txt": true,
-		"input.txt": true,
+const run = [
+	{
+		file: "sample.txt",
+		fn: partOne,
 	},
-	partTwo: {
-		"sample.txt": false,
-		"input.txt": false,
+	{
+		file: "input.txt",
+		fn: partOne,
 	},
-};
+];
 
 console.table(solution());
 function solution() {
 	// Deal with input txt
-	return ["sample.txt", "input.txt"].reduce((acc, file) => {
-		const partOneAns = run.partOne[file] ? partOne(parseInput(file)) : "skip";
-		return {
-			...acc,
-			[file]: {
-				"part 1": partOneAns,
-				"part 2": run.partTwo[file]
-					? partTwo(parseInput(file), partOneAns)
-					: "skip",
-			},
-		};
-	}, {});
+	return run.forEach(({ file, fn }) => {
+		console.log(`File: ${file}`);
+		console.log(fn(parseInput(file)));
+	});
 }
