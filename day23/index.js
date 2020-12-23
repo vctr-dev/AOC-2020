@@ -31,6 +31,7 @@ class Cups {
 		while (head.next) {
 			head = head.next;
 		}
+
 		head.next = dest.next;
 		dest.next = cups;
 	}
@@ -38,17 +39,18 @@ class Cups {
 	move() {
 		const removedCups = this.removeNext(3);
 
-		const { max, min } = this.findMaxMin();
-		let destCup;
-		for (let label = this.head.label - 1; label >= min; label--) {
-			if (this.head.find((x) => x.label === label)) {
-				destCup = this.index[label];
-				break;
+		let label = this.head.label - 1;
+		if (label < this.min) {
+			label = this.max;
+		}
+
+		while (removedCups.find((x) => x.label === label)) {
+			label--;
+			if (label < this.min) {
+				label = this.max;
 			}
 		}
-		if (!destCup) {
-			destCup = this.index[max];
-		}
+		let destCup = this.index[label];
 		this.insert(destCup, removedCups);
 		this.head = this.head.next;
 	}
@@ -70,12 +72,15 @@ class Cups {
 	}
 	reindex() {
 		let head = this.head;
-		const max = this.findMaxMin().max;
+		const { max, min } = this.findMaxMin();
 		this.index = new Array(max);
 		do {
 			this.index[head.label] = head;
 			head = head.next;
 		} while (head != this.head);
+		this.max = max;
+		this.min = min;
+		console.log({ index: this.index, min: this.min, max: this.max });
 	}
 }
 
@@ -120,25 +125,25 @@ function partTwo(cups) {
 	while (lastCup.next !== cups.head) {
 		lastCup = lastCup.next;
 	}
-	for (let i = 0; i < 1000000; i++) {
-		lastCup.next = new Cup(max + 1 + i);
+	for (let i = max + 1; i <= 1000000; i++) {
+		lastCup.next = new Cup(i);
 		lastCup = lastCup.next;
 	}
 	lastCup.next = cups.head;
 	cups.reindex();
 
 	for (let i = 0; i < 10000000; i++) {
-		console.log(i);
 		cups.move();
 	}
 
-	return "part two";
+	const oneCup = cups.head.find((x) => x.label === 1);
+	return oneCup.next.label * oneCup.next.next.label;
 }
 
 const run = [
 	{
-		file: "sample.txt",
-		fn: partOne,
+		file: "input.txt",
+		fn: partTwo,
 	},
 	// {
 	// 	file: "input.txt",
