@@ -33,6 +33,7 @@ function processLine(line) {
 }
 
 class TileMap {
+	// Doubled coordinate system
 	constructor() {
 		this.tiles = {};
 	}
@@ -50,16 +51,22 @@ class TileMap {
 		this.forEach((x, y) => {
 			const isBlack = this.isBlackAtCoord(x, y);
 			const numBlacks = this.numBlackAround(x, y);
-			if (isBlack && (numBlacks === 0 || numBlacks >= 2)) {
-				newTileMap.flip(x, y);
+			let didFlip = false;
+			if (isBlack && (numBlacks === 0 || numBlacks > 2)) {
+				newTileMap.change(x, y, false);
+				didFlip = true;
 			}
 			if (!isBlack && numBlacks === 2) {
-				console.log(x, y, numBlacks);
-				newTileMap.flip(x, y);
+				newTileMap.change(x, y, true);
+				didFlip = true;
 			}
 		});
 
 		return newTileMap;
+	}
+
+	change(x, y, isBlack) {
+		this.tiles[`${x},${y}`] = isBlack;
 	}
 
 	numBlackAround(x, y) {
@@ -115,28 +122,44 @@ class TileMap {
 
 	forEach(fn) {
 		const bounds = this.getBounds();
+		bounds.y.min -= 1;
+		bounds.y.max += 1;
+		bounds.x.min -= 2;
+		bounds.x.max += 2;
+		let evenRowMin;
+		let oddRowMin;
+		let evenRowMax;
+		let oddRowMax;
+		if (bounds.x.min % 2 === 0) {
+			evenRowMin = bounds.x.min;
+			oddRowMin = bounds.x.min + 1;
+		} else {
+			evenRowMin = bounds.x.min - 1;
+			oddRowMin = bounds.x.min;
+		}
+		if (bounds.x.max % 2 === 0) {
+			evenRowMax = bounds.x.max;
+			oddRowMax = bounds.x.max + 1;
+		} else {
+			evenRowMax = bounds.x.max - 1;
+			oddRowMax = bounds.x.max;
+		}
 		for (let y = bounds.y.min; y <= bounds.y.max; y++) {
-			let minX;
-			if (y % 2) {
-				if (bounds.x.min % 2) {
-					minX = bounds.x.min;
-				} else {
-					minX = bounds.x.min - 1;
-				}
+			let minX, maxX;
+			if (y % 2 === 0) {
+				minX = evenRowMin;
+				maxX = evenRowMax;
 			} else {
-				if (bounds.x.min % 2) {
-					minX = bounds.x.min - 1;
-				} else {
-					minX = bounds.x.min;
-				}
+				minX = oddRowMin;
+				maxX = oddRowMax;
 			}
-			for (let x = minX; x <= bounds.x.max; x += 2) {
+			for (let x = minX; x <= maxX; x += 2) {
 				fn(x, y);
 			}
 		}
 	}
 
-	toString() {
+	toString(markX, markY) {
 		let prevY;
 		let cur = "";
 		let allArray = [];
@@ -144,14 +167,23 @@ class TileMap {
 			if (prevY != y) {
 				allArray.push(cur);
 				prevY = y;
-				cur = y % 2 ? "" : " ";
+				cur = y % 2 ? " " : "";
 			}
-			cur += this.isBlackAtCoord(x, y) ? "1" : "0";
+			if (markX === x && markY === y) {
+				cur += "X";
+			} else {
+				cur += this.isBlackAtCoord(x, y) ? "1" : "0";
+			}
 			cur += " ";
 		});
 		allArray.push(cur);
 		allArray.shift();
 		return allArray.join("\n");
+	}
+	removeWhites() {
+		this.tiles = Object.fromEntries(
+			Object.entries(this.tiles).filter(([k, v]) => v)
+		);
 	}
 }
 function partOne(directionSets) {
@@ -170,12 +202,11 @@ function getTileMap(directionSets) {
 
 function partTwo(directionSets) {
 	let tileMap = getTileMap(directionSets);
-	console.log(tileMap.toString());
-	for (let i = 0; i < 1; i++) {
-		console.log(`Day ${i + 1}`);
+	for (let i = 0; i < 100; i++) {
 		tileMap = tileMap.dayPassed();
+		tileMap.removeWhites();
+		console.log(`Day ${i + 1}: ${tileMap.numBlacks()}`);
 	}
-	console.log(tileMap.toString());
 	return tileMap.numBlacks();
 }
 
@@ -184,10 +215,10 @@ const run = [
 		file: "sample.txt",
 		fn: partTwo,
 	},
-	// {
-	// 	file: "input.txt",
-	// 	fn: partTwo,
-	// },
+	{
+		file: "input.txt",
+		fn: partTwo,
+	},
 ];
 solution();
 
